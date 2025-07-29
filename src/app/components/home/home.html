@@ -1,0 +1,65 @@
+<div class="text-center mb-8">
+  <h1 class="text-5xl font-bold text-gray-800 mb-4">Chrome DevTools</h1>
+  <p class="text-xl text-gray-600 mb-2">A practical demo app for learning debugging techniques</p>
+  <p class="text-sm text-gray-500 mb-6">Open DevTools (F12) and explore the debugging features</p>
+  
+  <div class="flex gap-3 justify-center flex-wrap">
+    <p-button 
+      label="API Demo" 
+      icon="pi pi-code" 
+      (click)="navigateTo('/debugger-demo')"
+      size="large">
+    </p-button>
+    <p-button 
+      label="Network Demo" 
+      icon="pi pi-globe" 
+      severity="secondary"
+      (click)="navigateTo('/network-override-demo')"
+      size="large">
+    </p-button>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6 mb-8">
+  <p-card header="🐛 API Demo" class="h-full">
+    <p class="text-gray-600 mb-4">
+      Interact with real APIs (JSONPlaceholder, Pokemon API) to practice debugging network requests, 
+      response handling, and data processing.
+    </p>
+    <ng-template pTemplate="footer">
+      <p-button 
+        label="Explore" 
+        icon="pi pi-arrow-right" 
+        (click)="navigateTo('/debugger-demo')"
+        size="small">
+      </p-button>
+    </ng-template>
+  </p-card>
+
+  <p-card header="🌐 Network Demo" class="h-full">
+    <p class="text-gray-600 mb-4">
+      Practice network overrides, simulate backend failures, and learn how to continue 
+      development when APIs are down.
+    </p>
+    <ng-template pTemplate="footer">
+      <p-button 
+        label="Explore" 
+        icon="pi pi-arrow-right" 
+        severity="secondary"
+        (click)="navigateTo('/network-override-demo')"
+        size="small">
+      </p-button>
+    </ng-template>
+  </p-card>
+</div>
+
+<p-divider></p-divider>
+
+<p-message severity="info" class="mt-6">
+  <ng-template pTemplate="detail">
+    <div class="flex items-center gap-2">
+      <i class="pi pi-info-circle"></i>
+      <span><strong>Tip:</strong> Keep Chrome DevTools open (F12) to follow along with the debugging demonstrations!</span>
+    </div>
+  </ng-template>
+</p-message>

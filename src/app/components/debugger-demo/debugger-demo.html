@@ -1,0 +1,167 @@
+<div class="space-y-6">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">API Demo</h1>
+    <p class="text-gray-600">Practice debugging with real API calls</p>
+  </div>
+
+  <!-- Users Section -->
+  <p-card header="👥 Users (JSONPlaceholder API)">
+    <p class="text-sm text-gray-600 mb-4">Fetch users and process their data</p>
+    
+    <div class="flex gap-2 mb-4">
+      <p-button 
+        label="Load Users" 
+        icon="pi pi-users"
+        (click)="loadUsers()"
+        [loading]="usersLoading()">
+      </p-button>
+      <p-button 
+        label="Process Data" 
+        icon="pi pi-cog"
+        severity="secondary"
+        (click)="processUsers()"
+        [disabled]="!users().length">
+      </p-button>
+      <p-button 
+        label="Calculate Stats" 
+        icon="pi pi-chart-bar"
+        severity="success"
+        (click)="calculateStats()"
+        [disabled]="!users().length">
+      </p-button>
+    </div>
+
+    @if (users().length > 0) {
+      <p-table [value]="users()" [paginator]="true" [rows]="10" class="mb-4">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Website</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.website }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+
+    @if (processedData().length > 0) {
+      <p-divider align="left">
+        <span class="text-sm font-bold">Processed Data</span>
+      </p-divider>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (item of processedData(); track item.id) {
+          <p-card class="text-center">
+            <h3 class="font-bold">{{ item.name }}</h3>
+            <p class="text-sm text-gray-600">{{ item.domain }}</p>
+          </p-card>
+        }
+      </div>
+    }
+  </p-card>
+
+  <!-- Pokemon Section -->
+  <p-card header="🔍 Pokemon API">
+    <p class="text-sm text-gray-600 mb-4">Search for Pokemon data</p>
+    
+    <div class="flex gap-2 mb-4">
+      <input 
+        pInputText 
+        type="text" 
+        placeholder="Enter Pokemon name (e.g., pikachu)" 
+        class="flex-1"
+        [(ngModel)]="pokemonName"
+        (keyup.enter)="searchPokemon()">
+      <p-button 
+        label="Search" 
+        icon="pi pi-search"
+        (click)="searchPokemon()"
+        [loading]="pokemonLoading()"
+        [disabled]="!pokemonName()">
+      </p-button>
+    </div>
+
+    @if (pokemon()) {
+      <p-card>
+        <div class="flex items-center gap-4">
+          <img [src]="pokemon()!.sprites.front_default" [alt]="pokemon()!.name" class="w-24 h-24">
+          <div>
+            <h3 class="text-xl font-bold capitalize">{{ pokemon()!.name }}</h3>
+            <div class="flex gap-2 mt-2">
+              @for (type of pokemon()!.types; track type.type.name) {
+                <p-chip [label]="type.type.name"></p-chip>
+              }
+            </div>
+          </div>
+        </div>
+      </p-card>
+    }
+  </p-card>
+
+  <!-- Calculation Section -->
+  <p-card header="🧮 Complex Calculations">
+    <p class="text-sm text-gray-600 mb-4">Test debugging with calculations and data processing</p>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Items (comma-separated numbers)
+        </label>
+        <input 
+          pInputText 
+          type="text" 
+          placeholder="10, 25, 8.5, 15" 
+          class="w-full"
+          [(ngModel)]="itemsInput"
+          (input)="parseItems()">
+      </div>
+
+      <div class="flex gap-2">
+        <p-button 
+          label="Calculate Total" 
+          icon="pi pi-calculator"
+          (click)="calculateTotal()"
+          [disabled]="items().length === 0">
+        </p-button>
+        <p-button 
+          label="Generate Random Items" 
+          icon="pi pi-refresh"
+          severity="secondary"
+          (click)="generateRandomItems()">
+        </p-button>
+      </div>
+
+      @if (total() !== null) {
+        <p-message severity="success">
+          <ng-template pTemplate="detail">
+            <strong>Total with tax:</strong> ${{ total() }}
+          </ng-template>
+        </p-message>
+      }
+
+      @if (items().length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p-card class="text-center">
+            <div class="text-2xl font-bold text-primary">{{ items().length }}</div>
+            <div class="text-sm text-gray-600">Items Count</div>
+          </p-card>
+          <p-card class="text-center">
+            <div class="text-2xl font-bold text-primary">${{ getAverage() }}</div>
+            <div class="text-sm text-gray-600">Average</div>
+          </p-card>
+          <p-card class="text-center">
+            <div class="text-2xl font-bold text-primary">${{ getMax() }}</div>
+            <div class="text-sm text-gray-600">Max Item</div>
+          </p-card>
+        </div>
+      }
+    </div>
+  </p-card>
+</div>
