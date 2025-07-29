@@ -15,6 +15,12 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "sourceMap": {
+              "scripts": true,
+              "styles": false,
+              "hidden": true,
+              "vendor": true
+            },
             "assets": [
               {
                 "glob": "**/*",
