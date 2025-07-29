@@ -1,21 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { DividerModule } from 'primeng/divider';
-import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-home',
-  imports: [ButtonModule, CardModule, DividerModule, MessageModule],
+  standalone: true,
+  imports: [ButtonModule],
   templateUrl: './home.html',
-  styleUrl: './home.css'
+  styleUrl: './home.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Home {
 
   constructor(private router: Router) {}
 
-  navigateTo(route: string) {
+  navigateTo(route: string): void {
     this.router.navigate([route]);
+  }
+
+  scrollToFeatures(): void {
+    const element = document.getElementById('features-preview');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 }

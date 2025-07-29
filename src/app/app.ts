@@ -1,36 +1,58 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterOutlet, Router } from '@angular/router';
-import { MenubarModule } from 'primeng/menubar';
-import { ButtonModule } from 'primeng/button';
-import { MenuItem } from 'primeng/api';
+import { RouterOutlet } from '@angular/router';
+import { Header } from './components/header/header';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MenubarModule, ButtonModule],
-  templateUrl: './app.html',
+  imports: [RouterOutlet, Header],
+  template: `
+    <div class="min-h-screen bg-gray-50 flex flex-col">
+      
+      <a href="#main-content" class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-blue-600 text-white p-2 z-50">
+        Aller au contenu principal
+      </a>
+
+      
+      <app-header></app-header>
+
+      
+      <main id="main-content" class="flex-grow">
+        <router-outlet />
+      </main>
+
+      
+      <footer class="bg-white border-t border-gray-200 py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+          <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span class="text-white font-bold text-xs">S</span>
+              </div>
+              <span class="text-lg font-bold text-gray-800">E-Shop</span>
+            </div>
+            
+            <div class="text-gray-600 text-sm">
+              <p>&copy; {{ currentYear }} E-Shop. Application de démonstration avec FakeStore API.</p>
+            </div>
+            
+            <div class="flex space-x-4 text-sm text-gray-500">
+              <span>Données: <a href="https://fakestoreapi.com" target="_blank" class="text-blue-600 hover:underline">FakeStore API</a></span>
+              <span>•</span>
+              <span>Thème: PrimeNG Aura</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  `,
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = 'Chrome DevTools Debugging Demo';
-
-  menuItems: MenuItem[] = [
-    {
-      label: 'Home',
-      icon: 'pi pi-home',
-      command: () => this.router.navigate(['/home'])
-    },
-    {
-      label: 'API Demo',
-      icon: 'pi pi-code',
-      command: () => this.router.navigate(['/debugger-demo'])
-    },
-    {
-      label: 'Network Demo',
-      icon: 'pi pi-globe',
-      command: () => this.router.navigate(['/network-override-demo'])
-    }
-  ];
-
-  constructor(private router: Router) {}
+  protected readonly title = 'E-Shop - Votre boutique en ligne';
+  protected readonly currentYear = new Date().getFullYear();
+  
+  constructor() {
+    
+  }
 }
