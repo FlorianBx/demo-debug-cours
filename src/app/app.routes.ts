@@ -20,21 +20,6 @@ export const routes: Routes = [
     title: 'E-Shop - Mon Panier'
   },
   
-  {
-    path: 'home',
-    redirectTo: '',
-    pathMatch: 'full'
-  },
-  {
-    path: 'features',
-    redirectTo: '',
-    pathMatch: 'full'
-  },
-  {
-    path: 'pricing',
-    redirectTo: '',
-    pathMatch: 'full'
-  },
   
   {
     path: '**',
