@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -10,6 +11,14 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { LoginCredentials } from '../../models/interfaces';
+
+interface LoginDebugState {
+  formValue: any;
+  formValid: boolean;
+  formErrors: string;
+  touchedFields: string;
+  authState: any; // Keep as any since it's from external service
+}
 
 @Component({
   selector: 'app-login',
@@ -22,124 +31,16 @@ import { LoginCredentials } from '../../models/interfaces';
     ButtonModule,
     ToastModule
   ],
-  template: `
-    <div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Connexion à E-Shop</h1>
-          <p class="text-gray-600">Connectez-vous pour accéder à votre compte</p>
-        </div>
-
-        <p-card>
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-            <div class="space-y-2">
-              <label for="username" class="block text-sm font-medium text-gray-700">
-                Nom d'utilisateur
-              </label>
-              <input
-                id="username"
-                pInputText
-                formControlName="username"
-                placeholder="Entrez votre nom d'utilisateur"
-                class="w-full"
-                [class.ng-invalid]="isFieldInvalid('username')"
-              />
-              <small 
-                *ngIf="isFieldInvalid('username')" 
-                class="text-red-500"
-              >
-                Le nom d'utilisateur est requis
-              </small>
-            </div>
-
-            <div class="space-y-2">
-              <label for="password" class="block text-sm font-medium text-gray-700">
-                Mot de passe
-              </label>
-              <p-password
-                id="password"
-                formControlName="password"
-                placeholder="Entrez votre mot de passe"
-                [feedback]="false"
-                [toggleMask]="true"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-                [class.ng-invalid]="isFieldInvalid('password')"
-              ></p-password>
-              <small 
-                *ngIf="isFieldInvalid('password')" 
-                class="text-red-500"
-              >
-                Le mot de passe est requis
-              </small>
-            </div>
-
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 class="text-sm font-medium text-blue-800 mb-2">Comptes de démonstration :</h3>
-              <div class="text-sm text-blue-700 space-y-1">
-                <div><strong>Admin :</strong> admin / admin</div>
-                <div><strong>Demo :</strong> demo / demo</div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              pButton
-              [label]="authService.isLoading() ? 'Connexion...' : 'Se connecter'"
-              [loading]="authService.isLoading()"
-              [disabled]="loginForm.invalid || authService.isLoading()"
-              class="w-full p-button-lg"
-            ></button>
-
-            <div *ngIf="showDebugInfo()" class="mt-6 p-4 bg-gray-100 rounded-lg">
-              <h4 class="text-sm font-medium text-gray-700 mb-2">Informations de debug :</h4>
-              <div class="text-xs text-gray-600 space-y-1">
-                <div>Formulaire valide : {{ loginForm.valid }}</div>
-                <div>Champs touchés : {{ getTouchedFields() }}</div>
-                <div>Erreurs : {{ getFormErrors() }}</div>
-                <div>État d'authentification : {{ authService.isAuthenticated() }}</div>
-                <div>Chargement : {{ authService.isLoading() }}</div>
-              </div>
-            </div>
-          </form>
-        </p-card>
-
-        <div class="mt-6 text-center">
-          <button
-            type="button"
-            pButton
-            label="Debug: Remplir Admin"
-            class="p-button-outlined p-button-sm mr-2"
-            (click)="fillAdminCredentials()"
-          ></button>
-          <button
-            type="button"
-            pButton
-            label="Debug: Remplir Demo"
-            class="p-button-outlined p-button-sm mr-2"
-            (click)="fillDemoCredentials()"
-          ></button>
-          <button
-            type="button"
-            pButton
-            label="Toggle Debug"
-            class="p-button-text p-button-sm"
-            (click)="toggleDebugInfo()"
-          ></button>
-        </div>
-      </div>
-    </div>
-
-    <p-toast></p-toast>
-  `,
+  templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly messageService = inject(MessageService);
   readonly authService = inject(AuthService);
 
+  private readonly destroy$ = new Subject<void>();
   private readonly debugMode = signal(false);
 
   readonly loginForm: FormGroup = this.fb.group({
@@ -161,19 +62,20 @@ export class LoginComponent {
         password: this.loginForm.value.password
       };
 
-      this.authService.login(credentials).subscribe({
+      this.authService.login(credentials)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
         next: (response) => {
           
           if (response.success) {
             this.messageService.add({
               severity: 'success',
               summary: 'Connexion réussie',
-              detail: `Bienvenue ${response.user?.name.firstname}!`
+              detail: `Bienvenue ${response.user?.name.firstname}!`,
+              life: 2000
             });
             
-            setTimeout(() => {
-              this.router.navigate(['/']);
-            }, 1500);
+            this.router.navigate(['/']);
           } else {
             this.messageService.add({
               severity: 'error',
@@ -196,6 +98,11 @@ export class LoginComponent {
         this.loginForm.get(key)?.markAsTouched();
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -259,8 +166,8 @@ export class LoginComponent {
     });
   }
 
-  debugFormState(): any {
-    const state = {
+  debugFormState(): LoginDebugState {
+    const state: LoginDebugState = {
       formValue: this.loginForm.value,
       formValid: this.loginForm.valid,
       formErrors: this.getFormErrors(),
